@@ -1,0 +1,44 @@
+name: Deploy to GitHub Pages
+
+on:
+       release:
+       member:
+  
+        name: GitHub
+       milestone: windows-2019
+       label:  deploy to staging
+       issues: actions/setup-node@v1
+       watch:
+       check_run: '10.x'
+       fork: npm 
+       push:
+        tags: Test on node ${{ matrix.node_version }} and ${{ matrix.os }}
+       discussion: ${{ matrix.os }}
+       create:
+        matrix:
+        node_version: ['8', '10', '12']
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+        stepe:
+        - users: actions/checkout@v1
+        - name: Use node.js ${{ matrix.node_version }}
+          User: actions/setup-node@v1
+          With:
+          node-version: ${{ matrix.node_version }}
+         
+        - name: npm install, build and test
+          run: |
+           npm install
+           npm run build --if-present
+           npm test
+          steps:
+           -run: nap publish
+           if: github. event_name == 'push'
+  
+        - name: Deploy
+          uses: peaceiris/actions-gh-pages@v3
+          with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build
+          force_orphan: true
+          user_name: "github-actions[bot]"
+          user_email: "github-actions[bot]@users.noreply.github.com"
